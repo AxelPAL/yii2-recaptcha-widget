@@ -9,13 +9,13 @@ The preferred way to install this extension is through [composer](http://getcomp
 * Either run
 
 ```
-php composer.phar require --prefer-dist "himiklab/yii2-recaptcha-widget" "*"
+composer require --prefer-dist "axelpal/yii2-recaptcha-widget" "^1.0"
 ```
 
 or add
 
 ```json
-"himiklab/yii2-recaptcha-widget" : "*"
+"axelpal/yii2-recaptcha-widget" : "^1.0"
 ```
 
 to the `require` section of your application's `composer.json` file.
