@@ -10,6 +10,7 @@ namespace himiklab\yii2\recaptcha;
 use Yii;
 use yii\base\InvalidConfigException;
 use yii\helpers\Html;
+use yii\web\JsExpression;
 use yii\widgets\InputWidget;
 
 /**
@@ -95,15 +96,16 @@ class ReCaptcha extends InputWidget
 
         $view = $this->view;
         $view->registerJsFile(
-            self::JS_API_URL . '?hl=' . $this->getLanguageSuffix(),
-            ['position' => $view::POS_HEAD, 'async' => true, 'defer' => true]
+            self::JS_API_URL . '?onload=onReCaptchaLoadCallback&render=explicit&hl=' . $this->getLanguageSuffix(),
+            ['position' => $view::POS_END, 'async' => true, 'defer' => true]
         );
 
         $this->customFieldPrepare();
 
         $divOptions = [
             'class' => 'g-recaptcha',
-            'data-sitekey' => $this->siteKey
+            'data-sitekey' => $this->siteKey,
+            'id' => "g-recaptcha-" . uniqid()
         ];
         if (!empty($this->jsCallback)) {
             $divOptions['data-callback'] = $this->jsCallback;
@@ -177,5 +179,19 @@ class ReCaptcha extends InputWidget
         $view->registerJs($jsCode, $view::POS_BEGIN);
         $view->registerJs($jsExpCode, $view::POS_BEGIN);
         echo Html::input('hidden', $inputName, null, ['id' => $inputId]);
+        $siteKey = $this->siteKey;
+        $multipleWidgetJs = new JsExpression(<<<JS
+        function onReCaptchaLoadCallback() {
+            var siteKey = '$siteKey';
+            var widgets = document.querySelectorAll('.g-recaptcha');
+            for (var i = 0, widget; widget = widgets[i]; i++) {
+                grecaptcha.render(widget.id, {
+                  'sitekey' : siteKey
+                });
+            }
+        };
+JS
+        );
+        $view->registerJs($multipleWidgetJs, $view::POS_BEGIN);
     }
 }
