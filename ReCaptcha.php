@@ -78,6 +78,11 @@ class ReCaptcha extends InputWidget
      * needs to solve a new CAPTCHA.
      */
     public $jsExpiredCallback;
+    /**
+     * @var string Your JS callback function that executes when CAPTCHA has been accepted
+     * needs to solve a new CAPTCHA.
+     */
+    public $jsSuccessCallback;
 
     /** @var array Additional html widget options, such as `class`. */
     public $widgetOptions = [];
@@ -178,6 +183,7 @@ class ReCaptcha extends InputWidget
 
         $view->registerJs($jsCode, $view::POS_BEGIN);
         $view->registerJs($jsExpCode, $view::POS_BEGIN);
+        $this->jsSuccessCallback = $this->jsSuccessCallback ?: 'function(){}';
         echo Html::input('hidden', $inputName, null, ['id' => $inputId]);
         $siteKey = $this->siteKey;
         $multipleWidgetJs = new JsExpression(<<<JS
@@ -186,7 +192,8 @@ class ReCaptcha extends InputWidget
             var widgets = document.querySelectorAll('.g-recaptcha');
             for (var i = 0, widget; widget = widgets[i]; i++) {
                 grecaptcha.render(widget.id, {
-                  'sitekey' : siteKey
+                    callback: $this->jsSuccessCallback,
+                    sitekey : siteKey
                 });
             }
         };
